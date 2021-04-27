@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import HttpError from "../models/http-error";
 import { validationResult } from "express-validator";
+import { Location } from "../models/location";
+import { v4 } from "uuid";
 
 let DUMMY_PLACES = [
     {
@@ -100,7 +102,17 @@ export const postPlace: Controllers = async (req, res, next) => {
             new HttpError("Invalid inputs passed, please check your data.", 422)
         );
     }
-    DUMMY_PLACES = [...DUMMY_PLACES, req.body];
+    let newLocation = new Location(req.body.address);
+    await newLocation.getGeometry();
+    if (newLocation.error) {
+        return next(new HttpError("Location provided not found", 404));
+    }
+    const { title, creator, description } = req.body;
+    const locationData = newLocation.getLocation();
+    DUMMY_PLACES = [
+        ...DUMMY_PLACES,
+        { id: v4(), title, description, ...locationData, creator },
+    ];
     res.status(201).json({
         message: "Place successfully added",
         places: DUMMY_PLACES,
@@ -118,6 +130,12 @@ export const updatePlaceById: Controllers = async (req, res, next) => {
     let index = DUMMY_PLACES.findIndex((place) => place.id == req.params.pid);
     if (index == -1) {
         return next(new HttpError("No place found with the provided id", 400));
+    }
+
+    if (req.body.address !== DUMMY_PLACES[index].address) {
+        let newLocation = new Location(req.body.address);
+        await newLocation.getGeometry();
+        req.body = { ...DUMMY_PLACES[index], ...newLocation.getLocation() };
     }
 
     DUMMY_PLACES[index] = req.body;
