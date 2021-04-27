@@ -22,8 +22,8 @@ router.post(
     [
         check("title").not().isEmpty(),
         check("description").isLength({ min: 5 }),
-        check("location").not().isEmpty(),
         check("creator").not().isEmpty(),
+        check("address").not().isEmpty(),
     ],
     postPlace
 );
@@ -33,8 +33,8 @@ router.patch(
     [
         check("title").not().isEmpty(),
         check("description").isLength({ min: 5 }),
-        check("location").not().isEmpty(),
         check("creator").not().isEmpty(),
+        check("address").not().isEmpty(),
     ],
     updatePlaceById
 );
