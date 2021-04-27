@@ -7,7 +7,7 @@ import {
     postPlace,
     updatePlaceById,
 } from "../controllers/places-controllers";
-// import HttpError from "../models/http-error";
+import { check } from "express-validator";
 
 const router = express.Router();
 
@@ -17,9 +17,27 @@ router.get("/:pid", getPlaceByPlaceId);
 
 router.get("/user/:uid", getPlacesByUserId);
 
-router.post("/", postPlace);
+router.post(
+    "/",
+    [
+        check("title").not().isEmpty(),
+        check("description").isLength({ min: 5 }),
+        check("location").not().isEmpty(),
+        check("creator").not().isEmpty(),
+    ],
+    postPlace
+);
 
-router.patch("/:pid", updatePlaceById);
+router.patch(
+    "/:pid",
+    [
+        check("title").not().isEmpty(),
+        check("description").isLength({ min: 5 }),
+        check("location").not().isEmpty(),
+        check("creator").not().isEmpty(),
+    ],
+    updatePlaceById
+);
 
 router.delete("/:pid", deletePlaceById);
 
