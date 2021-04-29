@@ -36,7 +36,7 @@ export class Location {
     async getGeometry() {
         let queryUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURI(
             this.address
-        )}.json?access_token=${process.env.REACT_APP_MAPBOX_TOKEN}`;
+        )}.json?access_token=${process.env.MAPBOX_TOKEN}`;
 
         let response: AxiosResponse<SuccessGeometry> = await axios.get(
             queryUrl
