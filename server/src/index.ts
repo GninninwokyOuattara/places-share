@@ -4,6 +4,8 @@ import placesRoutes from "./routes/places-routes";
 import usersRoutes from "./routes/users-routes";
 import HttpError from "./models/http-error";
 
+require("./database/mongoose");
+
 const PORT = process.env.PORT || 5000;
 
 const app = express();
