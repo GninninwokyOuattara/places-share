@@ -6,53 +6,6 @@ import { v4 } from "uuid";
 
 import { Place } from "../database/schema/place";
 
-let DUMMY_PLACES = [
-    {
-        id: "p1",
-        title: "The title",
-        description: "The places description",
-        location: {
-            lat: 40.74,
-            long: -73.44,
-        },
-        address: "20 W 34",
-        creator: "u1",
-    },
-    {
-        id: "p2",
-        title: "The title",
-        description: "The places description",
-        location: {
-            lat: 40.74,
-            long: -73.44,
-        },
-        address: "20 W 34",
-        creator: "u2",
-    },
-    {
-        id: "p3",
-        title: "The title",
-        description: "The places description",
-        location: {
-            lat: 40.74,
-            long: -73.44,
-        },
-        address: "20 W 34",
-        creator: "u1",
-    },
-    {
-        id: "p4",
-        title: "The title",
-        description: "The places description",
-        location: {
-            lat: 40.74,
-            long: -73.44,
-        },
-        address: "20 W 34",
-        creator: "u2",
-    },
-];
-
 type Controllers = (req: Request, res: Response, next: NextFunction) => void;
 
 interface PostBody {
@@ -73,29 +26,35 @@ export const getAllPlaces: Controllers = async (req, res, next) => {
 };
 
 export const getPlaceByPlaceId: Controllers = async (req, res, next) => {
-    const place = Place.findOne({ _id: req.body._id });
+    try {
+        const place = await Place.findOne({ _id: req.params.pid });
 
-    if (!place) {
-        return next(
-            new HttpError("No place was found for the provided place id", 404)
-        );
+        if (!place) {
+            return next(
+                new HttpError(
+                    "No place was found for the provided place id",
+                    404
+                )
+            );
+        }
+
+        return res.json({ place });
+    } catch (error) {
+        return next(new HttpError(error.message, 500));
     }
-
-    return res.json({ place });
 };
 
 export const getPlacesByUserId: Controllers = async (req, res, next) => {
-    const user_places = DUMMY_PLACES.filter(
-        (place) => place.creator == req.params.uid
-    );
-
-    if (!user_places) {
-        return next(
-            new HttpError("No place was found for the provided user id", 404)
-        );
+    console.log(req.params.uid);
+    try {
+        let places = await Place.find({ creator: req.params.uid });
+        if (!places.length) {
+            return next(new HttpError("No places found for this user", 422));
+        }
+        return res.json({ places });
+    } catch (error) {
+        return next(new HttpError("Unexpected Error", 500));
     }
-
-    return res.json({ user_places });
 };
 
 export const postPlace: Controllers = async (req, res, next) => {
@@ -110,15 +69,9 @@ export const postPlace: Controllers = async (req, res, next) => {
     if (newLocation.error) {
         return next(new HttpError("Location provided not found", 404));
     }
-    // const { title, creator, description } = req.body;
     const locationData = newLocation.getLocation();
-    // DUMMY_PLACES = [
-    //     ...DUMMY_PLACES,
-    //     { id: v4(), title, description, ...locationData, creator },
-    // ];
-    let place = await Place.create({ ...req.body, ...locationData });
 
-    // let p = new Place({ ...req.body, ...locationData });
+    let place = await Place.create({ ...req.body, ...locationData });
     res.status(201).json({
         message: "Place successfully added",
         place,
@@ -133,31 +86,45 @@ export const updatePlaceById: Controllers = async (req, res, next) => {
         );
     }
 
-    let index = DUMMY_PLACES.findIndex((place) => place.id == req.params.pid);
-    if (index == -1) {
-        return next(new HttpError("No place found with the provided id", 400));
+    let newLocation = new Location(req.body.address);
+    await newLocation.getGeometry();
+    if (newLocation.error) {
+        return next(new HttpError("Location provided not found", 404));
     }
-
-    if (req.body.address !== DUMMY_PLACES[index].address) {
-        let newLocation = new Location(req.body.address);
-        await newLocation.getGeometry();
-        req.body = { ...DUMMY_PLACES[index], ...newLocation.getLocation() };
+    const locationData = newLocation.getLocation();
+    let updatedPlace = { ...req.body, ...locationData };
+    try {
+        let place = await Place.findOneAndUpdate(
+            { _id: req.params.pid },
+            updatedPlace,
+            {
+                new: true,
+                useFindAndModify: false,
+            }
+        );
+        if (!place) {
+            return next(
+                new HttpError("Impossible to update inexistant place.", 422)
+            );
+        }
+        return res.json({ place });
+    } catch (error) {
+        return next(new HttpError("Unexpected Error", 500));
     }
-
-    DUMMY_PLACES[index] = req.body;
-    return res
-        .status(200)
-        .json({ message: "Place updated successfully", DUMMY_PLACES });
 };
 
 export const deletePlaceById: Controllers = async (req, res, next) => {
-    let places_id: string[] = [];
+    try {
+        let place = await Place.findOneAndDelete(
+            { _id: req.params.pid },
+            { useFindAndModify: false }
+        );
 
-    let index = DUMMY_PLACES.findIndex((place) => place.id == req.params.pid);
-    if (index == -1) {
-        return next(new HttpError("No place found with the provided id", 404));
+        if (!place) {
+            return next(new HttpError("Can't delete inexistant place", 422));
+        }
+        return res.json({ place });
+    } catch (error) {
+        return next(new HttpError("Unexpected error", 500));
     }
-
-    DUMMY_PLACES = DUMMY_PLACES.filter((place) => place.id !== req.params.pid);
-    return res.json({ message: "Place successfully deleted", DUMMY_PLACES });
 };
