@@ -4,6 +4,8 @@ import { validationResult } from "express-validator";
 import { Location } from "../models/location";
 import { v4 } from "uuid";
 
+import { Place } from "../database/schema/place";
+
 let DUMMY_PLACES = [
     {
         id: "p1",
@@ -66,11 +68,12 @@ interface PostBody {
 }
 
 export const getAllPlaces: Controllers = async (req, res, next) => {
-    res.json({ DUMMY_PLACES });
+    const places = await Place.find({});
+    res.json({ places });
 };
 
 export const getPlaceByPlaceId: Controllers = async (req, res, next) => {
-    const place = DUMMY_PLACES.find((place) => place.id == req.params.pid);
+    const place = Place.findOne({ _id: req.body._id });
 
     if (!place) {
         return next(
@@ -107,15 +110,18 @@ export const postPlace: Controllers = async (req, res, next) => {
     if (newLocation.error) {
         return next(new HttpError("Location provided not found", 404));
     }
-    const { title, creator, description } = req.body;
+    // const { title, creator, description } = req.body;
     const locationData = newLocation.getLocation();
-    DUMMY_PLACES = [
-        ...DUMMY_PLACES,
-        { id: v4(), title, description, ...locationData, creator },
-    ];
+    // DUMMY_PLACES = [
+    //     ...DUMMY_PLACES,
+    //     { id: v4(), title, description, ...locationData, creator },
+    // ];
+    let place = await Place.create({ ...req.body, ...locationData });
+
+    // let p = new Place({ ...req.body, ...locationData });
     res.status(201).json({
         message: "Place successfully added",
-        places: DUMMY_PLACES,
+        place,
     });
 };
 
