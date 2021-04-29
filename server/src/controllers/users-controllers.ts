@@ -2,43 +2,13 @@ import { Request, Response, NextFunction } from "express";
 import { validationResult } from "express-validator";
 import HttpError from "../models/http-error";
 
+import { User } from "../database/schema/user";
+
 type Controllers = (req: Request, res: Response, next: NextFunction) => void;
 
-let DUMMY_USERS = [
-    {
-        name: "u1",
-        email: "u1@mail.com",
-        password: "password",
-        image: "image",
-    },
-    {
-        name: "u2",
-        email: "u1@mail.com",
-        password: "pass",
-        image: "image",
-    },
-    {
-        name: "u1",
-        email: "u1@mail.com",
-        password: "pass",
-        image: "image",
-    },
-    {
-        name: "u2",
-        email: "u1@mail.com",
-        password: "pass",
-        image: "image",
-    },
-    {
-        name: "u2",
-        email: "u1@mail.com",
-        password: "pass",
-        image: "image",
-    },
-];
-
 export const getUsers: Controllers = async (req, res, next) => {
-    return res.json({ DUMMY_USERS });
+    const users = await User.find({});
+    return res.json(users);
 };
 
 export const signUp: Controllers = async (req, res, next) => {
@@ -49,14 +19,19 @@ export const signUp: Controllers = async (req, res, next) => {
         );
     }
 
-    let index = DUMMY_USERS.findIndex((user) => user.email == req.body.email);
-
-    if (index != -1) {
-        return next(new HttpError("Email already in use", 500));
+    let user = await User.findOne({ email: req.body.email });
+    if (user) {
+        return next(
+            new HttpError("Email already in use, please change it.", 402)
+        );
     }
 
-    DUMMY_USERS = [...DUMMY_USERS, req.body];
-    return res.json({ DUMMY_USERS });
+    try {
+        user = await User.create(req.body);
+        return res.json({ user });
+    } catch (error) {
+        return next(new HttpError(error.message, 422));
+    }
 };
 
 export const logIn: Controllers = async (req, res, next) => {
@@ -69,11 +44,9 @@ export const logIn: Controllers = async (req, res, next) => {
 
     const { email, password } = req.body;
 
-    let user = DUMMY_USERS.find(
-        (user) => user.email == email && user.password == password
-    );
+    let user = await User.findOne({ email: email, password: password });
     if (!user) {
-        return next(new HttpError("No user found.", 401));
+        return next(new HttpError("No account found", 400));
     }
-    return res.json({ message: "Logged in successfully" });
+    return res.json({ message: "Success", user });
 };
