@@ -118,26 +118,27 @@ export const updatePlaceById: Controllers = async (req, res, next) => {
     if (newLocation.error) {
         return next(new HttpError("Location provided not found", 404));
     }
+
     const locationData = newLocation.getLocation();
     let updatedPlace = { ...req.body, ...locationData };
-    try {
-        let place = await Place.findOneAndUpdate(
-            { _id: req.params.pid },
-            updatedPlace,
-            {
-                new: true,
-                useFindAndModify: false,
-            }
-        );
-        if (!place) {
-            return next(
-                new HttpError("Impossible to update inexistant place.", 422)
-            );
-        }
-        return res.json({ place });
-    } catch (error) {
-        return next(new HttpError("Unexpected Error", 500));
+
+    let place = await Place.findById(req.params.pid);
+    if (!place) {
+        return next(new HttpError("Could not find place", 404));
     }
+
+    try {
+        place.title = updatedPlace.title;
+        place.description = updatedPlace.description;
+        place.address = updatedPlace.address;
+        await place.save();
+    } catch (error) {
+        return next(
+            new HttpError("Could not update place, please try again.", 521)
+        );
+    }
+
+    return res.json({ message: "Update completed.", place });
 };
 
 export const deletePlaceById: Controllers = async (req, res, next) => {
