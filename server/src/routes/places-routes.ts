@@ -33,7 +33,6 @@ router.patch(
     [
         check("title").not().isEmpty(),
         check("description").isLength({ min: 5 }),
-        check("creator").not().isEmpty(),
         check("address").not().isEmpty(),
     ],
     updatePlaceById
