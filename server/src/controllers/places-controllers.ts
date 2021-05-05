@@ -3,8 +3,10 @@ import HttpError from "../models/http-error";
 import { validationResult } from "express-validator";
 import { Location } from "../models/location";
 import { v4 } from "uuid";
+import mongoose from "mongoose";
 
 import { Place } from "../database/schema/place";
+import { User } from "../database/schema/user";
 
 type Controllers = (req: Request, res: Response, next: NextFunction) => void;
 
@@ -45,7 +47,6 @@ export const getPlaceByPlaceId: Controllers = async (req, res, next) => {
 };
 
 export const getPlacesByUserId: Controllers = async (req, res, next) => {
-    console.log(req.params.uid);
     try {
         let places = await Place.find({ creator: req.params.uid });
         if (!places.length) {
@@ -70,9 +71,35 @@ export const postPlace: Controllers = async (req, res, next) => {
         return next(new HttpError("Location provided not found", 404));
     }
     const locationData = newLocation.getLocation();
+    let place;
+    let user;
+    place = new Place({ ...req.body, ...locationData });
 
-    let place = await Place.create({ ...req.body, ...locationData });
-    res.status(201).json({
+    try {
+        user = await User.findById(req.body.creator);
+        if (!user) {
+            return next(
+                new HttpError("Could not find user for provided Id", 404)
+            );
+        }
+    } catch (error) {
+        return next(new HttpError("Could not find user for provided Id", 404));
+    }
+
+    try {
+        const sess = await mongoose.startSession();
+        sess.startTransaction();
+        await place.save({ session: sess });
+        user.places.push(place);
+        await user.save({ session: sess });
+        sess.commitTransaction();
+    } catch (error) {
+        return next(
+            new HttpError("Could not create place, please try again...", 500)
+        );
+    }
+
+    return res.status(201).json({
         message: "Place successfully added",
         place,
     });
