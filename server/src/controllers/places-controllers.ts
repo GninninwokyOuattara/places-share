@@ -3,7 +3,7 @@ import HttpError from "../models/http-error";
 import { validationResult } from "express-validator";
 import { Location } from "../models/location";
 import { v4 } from "uuid";
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 
 import { Place } from "../database/schema/place";
 import { User } from "../database/schema/user";
@@ -141,17 +141,28 @@ export const updatePlaceById: Controllers = async (req, res, next) => {
 };
 
 export const deletePlaceById: Controllers = async (req, res, next) => {
+    const sess = await mongoose.startSession();
+    let place: any;
+    let user: any;
     try {
-        let place = await Place.findOneAndDelete(
-            { _id: req.params.pid },
-            { useFindAndModify: false }
-        );
-
+        sess.startTransaction();
+        place = await Place.findById(req.params.pid);
         if (!place) {
-            return next(new HttpError("Can't delete inexistant place", 422));
+            return next(new HttpError("Place not found", 404));
         }
-        return res.json({ place });
+        place.remove({ session: sess });
+        user = await User.findById(place.creator);
+        user.places.pull(req.params.pid);
+        user.save();
+        sess.commitTransaction();
     } catch (error) {
-        return next(new HttpError("Unexpected error", 500));
+        return next(
+            new HttpError("Could not complete deletion, please try again.", 502)
+        );
     }
+
+    return res.json({
+        message: "Place succesfully deleted",
+        place,
+    });
 };
