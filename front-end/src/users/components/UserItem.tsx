@@ -1,4 +1,6 @@
 import React from "react";
+import Avatar from "../../shared/components/UIElements/Avatar";
+import "./UserItem.css";
 
 interface props {
     name: string;
@@ -12,7 +14,7 @@ const UserItem: React.FC<props> = ({ name, image, id, placeCount }) => {
         <li className="user-item">
             <div className="user-item__content">
                 <div className="user-item__image">
-                    <img src={image} alt={name} />
+                    <Avatar image={image} alt={name} />
                 </div>
                 <div className="user-item__info">
                     <h2>{name}</h2>
