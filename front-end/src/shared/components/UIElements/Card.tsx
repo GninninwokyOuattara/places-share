@@ -3,9 +3,9 @@ import React from "react";
 import "./Card.css";
 
 interface props {
-    children: any;
-    className: any;
-    style: any;
+    children?: any;
+    className?: any;
+    style?: any;
 }
 
 const Card: React.FC<props> = (props) => {
