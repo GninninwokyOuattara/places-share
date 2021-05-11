@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Card from "../../shared/components/UIElements/Card";
 import Button from "../../shared/components/FormElements/Button";
 import Modal from "../../shared/components/UIElements/Modal";
+import Map from "../../shared/components/UIElements/Map";
 
 import "./PlaceItem.css";
 
@@ -16,11 +17,20 @@ interface props {
     address: string;
 }
 
-const PlaceItem: React.FC<props> = ({ id, title, image, address }) => {
+const PlaceItem: React.FC<props> = ({
+    id,
+    title,
+    image,
+    address,
+    coordinates,
+}) => {
     const [showMap, setShowMap] = useState(false);
 
     const openMapHandler = () => setShowMap(true);
     const closeMapHandler = () => setShowMap(false);
+
+    const center = { lat: coordinates.lat, lng: coordinates.long };
+
     return (
         <React.Fragment>
             <Modal
@@ -32,7 +42,7 @@ const PlaceItem: React.FC<props> = ({ id, title, image, address }) => {
                 footer={<Button onClick={closeMapHandler}>CLOSE</Button>}
             >
                 <div className="map-container">
-                    <h2>THE MAP</h2>
+                    <Map center={center} zoom={16} />
                 </div>
             </Modal>
             <li className="place-item">

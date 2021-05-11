@@ -3,6 +3,8 @@ import { CSSTransition } from "react-transition-group";
 
 import ModalOverlay from "./ModalOverlay";
 import Backdrop from "./Backdrop";
+import Map from "./Map";
+
 import "./Modal.css";
 
 const Modal: React.FC<any> = (props) => {
@@ -16,7 +18,7 @@ const Modal: React.FC<any> = (props) => {
                 timeout={200}
                 classNames="modal"
             >
-                <ModalOverlay {...props} />
+                <ModalOverlay {...props}>{/* <Map /> */}</ModalOverlay>
             </CSSTransition>
         </React.Fragment>
     );
