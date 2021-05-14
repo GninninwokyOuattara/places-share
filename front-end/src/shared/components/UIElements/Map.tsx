@@ -25,7 +25,7 @@ const Map: React.FC<props> = (props) => {
         });
 
         new window.google.maps.Marker({ position: center, map: map });
-    }, [center]);
+    }, [center, zoom]);
 
     return (
         <div
