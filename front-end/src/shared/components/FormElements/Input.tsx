@@ -1,4 +1,4 @@
-import React, { useReducer } from "react";
+import React, { useReducer, useEffect } from "react";
 
 import { validate } from "../../util/validators";
 import "./Input.css";
@@ -38,6 +38,7 @@ const Input: React.FC<{
     label?: string;
     errorText?: string;
     validators: { type: string; val?: number }[];
+    onInput: (id: string, value: string, isValid: boolean) => void;
 }> = (props) => {
     const [inputState, dispatch] = useReducer(inputReducer, {
         isValid: true,
@@ -62,6 +63,13 @@ const Input: React.FC<{
             validators: props.validators,
         });
     };
+
+    const { id, onInput } = props;
+    const { value, isValid } = inputState;
+
+    useEffect(() => {
+        onInput(id!, value, isValid);
+    }, [id, value, isValid, onInput]);
 
     const element =
         props.element === "input" ? (
