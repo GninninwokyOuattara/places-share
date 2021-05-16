@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
 
 import Input from "../../shared/components/FormElements/Input";
@@ -8,6 +8,8 @@ import {
     VALIDATOR_REQUIRE,
 } from "../../shared/util/validators";
 import "./PlaceForm.css";
+
+import useForm from "../../shared/hooks/form-hook";
 
 const DUMMY_PLACES = [
     {
@@ -39,7 +41,58 @@ const DUMMY_PLACES = [
 const UpdatePlace = () => {
     const { placeid } = useParams<{ placeid: string }>();
 
+    const [isLoading, setIsloading] = useState(true);
+    const [formState, inputHandler, setFormData] = useForm(
+        {
+            title: {
+                value: "k",
+                isValid: false,
+            },
+            description: {
+                value: "",
+                isValid: false,
+            },
+        },
+        false
+    );
+
     const identifiedPlace = DUMMY_PLACES.find((place) => place.id === placeid);
+
+    useEffect(() => {
+        setFormData(
+            {
+                title: {
+                    value: identifiedPlace?.title,
+                    isValid: true,
+                },
+                description: {
+                    value: identifiedPlace?.description,
+                    isValid: true,
+                },
+                address: {
+                    value: identifiedPlace?.address,
+                    isValid: true,
+                },
+            },
+            true
+        );
+        setIsloading(false);
+    }, [setFormData, identifiedPlace]);
+
+    const placeUpdateSubmitHandler: React.FormEventHandler<HTMLFormElement> = (
+        event
+    ) => {
+        event.preventDefault();
+        console.log(formState.inputs);
+    };
+
+    if (isLoading) {
+        return (
+            <div className="center">
+                <h2>Loading...</h2>
+            </div>
+        );
+    }
 
     if (!identifiedPlace) {
         return (
@@ -50,7 +103,11 @@ const UpdatePlace = () => {
     }
 
     return (
-        <form action="" className="place-form">
+        <form
+            action=""
+            className="place-form"
+            onSubmit={placeUpdateSubmitHandler}
+        >
             <Input
                 id="title"
                 element="input"
@@ -58,9 +115,9 @@ const UpdatePlace = () => {
                 label="Title"
                 validators={[VALIDATOR_REQUIRE()]}
                 errorText="Please enter a valid title"
-                onInput={() => {}}
-                value={identifiedPlace.title}
-                valid={true}
+                onInput={inputHandler}
+                value={formState.inputs.title.value}
+                valid={formState.inputs.title.isValid}
             />
             <Input
                 id="description"
@@ -69,22 +126,22 @@ const UpdatePlace = () => {
                 label="Description"
                 validators={[VALIDATOR_MINLENGTH(5)]}
                 errorText="Please enter a valid title (at least 5 characters)"
-                onInput={() => {}}
-                value={identifiedPlace.description}
-                valid={true}
+                onInput={inputHandler}
+                value={formState.inputs.description.value}
+                valid={formState.inputs.description.isValid}
             />
             <Input
                 id="address"
                 element="input"
                 type="text"
-                label="Description"
+                label="Address"
                 validators={[VALIDATOR_REQUIRE()]}
                 errorText="Please enter a valid address"
-                onInput={() => {}}
-                value={identifiedPlace.address}
-                valid={true}
+                onInput={inputHandler}
+                value={formState.inputs.address?.value}
+                valid={formState.inputs.address?.isValid}
             />
-            <Button type="submit" disabled={true}>
+            <Button type="submit" disabled={!formState.isValid}>
                 ADD PLACE
             </Button>
         </form>
