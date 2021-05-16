@@ -6,7 +6,7 @@ import {
     VALIDATOR_MINLENGTH,
     VALIDATOR_REQUIRE,
 } from "../../shared/util/validators";
-import "./NewPlace.css";
+import "./PlaceForm.css";
 
 const formReducer = (state: any, action: any) => {
     switch (action.type) {
@@ -22,6 +22,7 @@ const formReducer = (state: any, action: any) => {
             return {
                 ...state,
                 inputs: {
+                    ...state.inputs,
                     [action.inputId]: {
                         value: action.value,
                         isValid: action.isValid,
@@ -53,8 +54,15 @@ const NewPlace: React.FC = () => {
         dispatch({ type: "INPUT_CHANGE", value, id, isValid, inputId: id });
     }, []);
 
+    const formSubmitHandler: React.FormEventHandler<HTMLFormElement> = (
+        event
+    ) => {
+        event.preventDefault();
+        console.log(formState.inputs);
+    };
+
     return (
-        <form action="" className="place-form">
+        <form action="" className="place-form" onSubmit={formSubmitHandler}>
             <Input
                 id="title"
                 element="input"
@@ -71,6 +79,15 @@ const NewPlace: React.FC = () => {
                 label="Description"
                 validators={[VALIDATOR_MINLENGTH(5)]}
                 errorText="Please enter a valid title (at least 5 characters)"
+                onInput={inputHandler}
+            />
+            <Input
+                id="address"
+                element="input"
+                type="text"
+                label="Description"
+                validators={[VALIDATOR_REQUIRE()]}
+                errorText="Please enter a valid address"
                 onInput={inputHandler}
             />
             <Button type="submit" disabled={!formState.isValid}>

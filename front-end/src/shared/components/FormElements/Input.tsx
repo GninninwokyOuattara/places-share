@@ -39,10 +39,12 @@ const Input: React.FC<{
     errorText?: string;
     validators: { type: string; val?: number }[];
     onInput: (id: string, value: string, isValid: boolean) => void;
+    value?: string;
+    valid?: boolean;
 }> = (props) => {
     const [inputState, dispatch] = useReducer(inputReducer, {
-        isValid: true,
-        value: "",
+        isValid: props.valid || false,
+        value: props.value || "",
         isTouched: false,
     });
 
