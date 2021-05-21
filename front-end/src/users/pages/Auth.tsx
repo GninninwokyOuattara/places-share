@@ -55,6 +55,7 @@ const Auth = () => {
     const loginHandler: React.FormEventHandler<HTMLFormElement> = (event) => {
         event.preventDefault();
         console.log(formState.inputs);
+        login();
     };
 
     return (
@@ -93,11 +94,7 @@ const Auth = () => {
                     errorText="Password must be at least 8 characters long"
                     onInput={inputHandler}
                 />
-                <Button
-                    type="submit"
-                    disabled={!formState.isValid}
-                    onClick={isLoginMode ? login : null}
-                >
+                <Button type="submit" disabled={!formState.isValid}>
                     {`${isLoginMode ? "LOGIN" : "SIGNUP"}`}
                 </Button>
             </form>
