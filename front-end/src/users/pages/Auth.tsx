@@ -45,7 +45,7 @@ const Auth = () => {
                 <Input
                     id="password"
                     element="input"
-                    type="text"
+                    type="password"
                     label="Password"
                     validators={[VALIDATOR_MINLENGTH(8)]}
                     errorText="Password must be at least 8 characters long"
