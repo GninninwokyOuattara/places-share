@@ -2,7 +2,7 @@ import React, { createContext, useState, useCallback } from "react";
 
 export const AuthContext =
     createContext<null | {
-        [key: string]: boolean | (() => () => any);
+        [key: string]: boolean | (() => any);
     }>(null);
 
 const AuthProvider: React.FC<{ children: React.ReactElement }> = ({
@@ -10,8 +10,8 @@ const AuthProvider: React.FC<{ children: React.ReactElement }> = ({
 }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    const login = useCallback<any>(() => setIsLoggedIn(true), []);
-    const logout = useCallback<any>(() => setIsLoggedIn(false), []);
+    const login = useCallback(() => setIsLoggedIn(true), []);
+    const logout = useCallback(() => setIsLoggedIn(false), []);
 
     return (
         <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
