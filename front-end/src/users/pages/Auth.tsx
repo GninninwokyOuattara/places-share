@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 
 import "./Auth.css";
 import Card from "../../shared/components/UIElements/Card";
@@ -11,7 +11,11 @@ import {
 } from "../../shared/util/validators";
 import useForm from "../../shared/hooks/form-hook";
 
+import { AuthContext } from "../../shared/context/auth-context";
+
 const Auth = () => {
+    const { login } = useContext(AuthContext) as { login: () => void };
+
     const [isLoginMode, setIsLoginMode] = useState(true);
     const [formState, inputHandler, setFormData] = useForm(
         {
@@ -89,12 +93,16 @@ const Auth = () => {
                     errorText="Password must be at least 8 characters long"
                     onInput={inputHandler}
                 />
-                <Button type="submit" disabled={!formState.isValid}>
-                    LOG IN
+                <Button
+                    type="submit"
+                    disabled={!formState.isValid}
+                    onClick={isLoginMode ? login : null}
+                >
+                    {`${isLoginMode ? "LOGIN" : "SIGNUP"}`}
                 </Button>
             </form>
             <Button type="submit" inverse onClick={switchModeHandler}>
-                {`SWITCH TO ${isLoginMode ? "REGISTER" : "LOGIN"}`}
+                {`SWITCH TO ${isLoginMode ? "SIGNUP" : "LOGIN"}`}
             </Button>
         </Card>
     );
