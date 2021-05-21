@@ -14,32 +14,35 @@ import MainNavigation from "./shared/components/Navigation/MainNavigation";
 import UserPlaces from "./places/pages/UserPlaces";
 import UpdatePlace from "./places/pages/UpdatePlace";
 import Auth from "./users/pages/Auth";
+import AuthProvider from "./shared/context/auth-context";
 
 function App() {
     return (
-        <Router>
-            <MainNavigation />
-            <main>
-                <Switch>
-                    <Route path="/" exact>
-                        <Users />
-                    </Route>
-                    <Route path="/:uid/places" exact>
-                        <UserPlaces />
-                    </Route>
-                    <Route path="/places/new" exact>
-                        <NewPlace />
-                    </Route>
-                    <Route path="/places/:placeid" exact>
-                        <UpdatePlace />
-                    </Route>
-                    <Route path="/auth" exact>
-                        <Auth />
-                    </Route>
-                    <Redirect to="/" />
-                </Switch>
-            </main>
-        </Router>
+        <AuthProvider>
+            <Router>
+                <MainNavigation />
+                <main>
+                    <Switch>
+                        <Route path="/" exact>
+                            <Users />
+                        </Route>
+                        <Route path="/:uid/places" exact>
+                            <UserPlaces />
+                        </Route>
+                        <Route path="/places/new" exact>
+                            <NewPlace />
+                        </Route>
+                        <Route path="/places/:placeid" exact>
+                            <UpdatePlace />
+                        </Route>
+                        <Route path="/auth" exact>
+                            <Auth />
+                        </Route>
+                        <Redirect to="/" />
+                    </Switch>
+                </main>
+            </Router>
+        </AuthProvider>
     );
 }
 export default App;
