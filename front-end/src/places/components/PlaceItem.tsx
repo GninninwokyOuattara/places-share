@@ -25,9 +25,17 @@ const PlaceItem: React.FC<props> = ({
     coordinates,
 }) => {
     const [showMap, setShowMap] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const openMapHandler = () => setShowMap(true);
     const closeMapHandler = () => setShowMap(false);
+
+    const openDeleteModal = () => setShowDeleteModal(true);
+    const closeDeleteModal = () => setShowDeleteModal(false);
+    const deleteModalConfirmHandler = () => {
+        setShowDeleteModal(false);
+        console.log("DELETING...");
+    };
 
     const center = { lat: coordinates.lat, lng: coordinates.long };
 
@@ -45,6 +53,25 @@ const PlaceItem: React.FC<props> = ({
                     <Map center={center} zoom={16} />
                 </div>
             </Modal>
+            <Modal
+                show={showDeleteModal}
+                header="Are you sure ?"
+                footerClass="place-item__modal-actions"
+                onCancel={closeDeleteModal}
+                footer={
+                    <React.Fragment>
+                        <Button inverse onClick={deleteModalConfirmHandler}>
+                            CONFIRM
+                        </Button>
+                        <Button danger onClick={closeDeleteModal}>
+                            CANCEL
+                        </Button>
+                    </React.Fragment>
+                }
+            >
+                Do you want to proceed and delete this place ? Please not this
+                action cannot be undone !
+            </Modal>
             <li className="place-item">
                 <Card>
                     <div className="place-item__image">
@@ -59,7 +86,9 @@ const PlaceItem: React.FC<props> = ({
                             VIEW ON MAP
                         </Button>
                         <Button to={`/places/${id}`}>EDIT</Button>
-                        <Button danger>DELETE</Button>
+                        <Button danger onClick={openDeleteModal}>
+                            DELETE
+                        </Button>
                     </div>
                 </Card>
             </li>
