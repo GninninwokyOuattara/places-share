@@ -34,8 +34,7 @@ const formReducer = (state: any, action: any) => {
 
 const useForm = (
     initialState: {
-        title: { value: string; isValid: boolean };
-        description: { value: string; isValid: boolean };
+        [key: string]: { value: string; isValid: boolean };
     },
     initialValid: boolean
 ) => {
