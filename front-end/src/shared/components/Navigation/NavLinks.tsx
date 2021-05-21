@@ -24,9 +24,11 @@ const NavLinks: React.FC = () => {
                     <NavLink to="/places/new">NEW PLACE</NavLink>
                 </li>
             )}
-            <li>
-                <NavLink to="/auth">AUTHENTIFICATE</NavLink>
-            </li>
+            {!auth.isLoggedIn && (
+                <li>
+                    <NavLink to="/auth">AUTHENTIFICATE</NavLink>
+                </li>
+            )}
         </ul>
     );
 };
