@@ -5,7 +5,10 @@ import "./NavLinks.css";
 import { AuthContext } from "../../context/auth-context";
 
 const NavLinks: React.FC = () => {
-    const auth = useContext(AuthContext) as { isLoggedIn: boolean };
+    const auth = useContext(AuthContext) as {
+        isLoggedIn: boolean;
+        logout: () => void;
+    };
 
     return (
         <ul className="nav-links">
@@ -27,6 +30,12 @@ const NavLinks: React.FC = () => {
             {!auth.isLoggedIn && (
                 <li>
                     <NavLink to="/auth">AUTHENTIFICATE</NavLink>
+                </li>
+            )}
+
+            {auth.isLoggedIn && (
+                <li>
+                    <button onClick={auth.logout}>LOGOUT</button>
                 </li>
             )}
         </ul>
