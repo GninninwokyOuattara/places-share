@@ -1,23 +1,45 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+
 import UsersList from "../components/UsersList";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
 
 const Users: React.FC = () => {
-    const USERS = [
-        {
-            id: "u1",
-            name: "Max S",
-            image: "https://images.pexels.com/photos/827518/pexels-photo-827518.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
-            places: 3,
-        },
-        {
-            id: "u2",
-            name: "Demi L",
-            image: "https://images.pexels.com/photos/2227832/pexels-photo-2227832.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
-            places: 4,
-        },
-    ];
+    const [loadedUsers, setLoadedUsers] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<null | string>(null);
 
-    return <UsersList items={USERS} />;
+    useEffect(() => {
+        setIsLoading(true);
+        const fetchUser = async () => {
+            try {
+                let response = await fetch("http://localhost:5000/api/users");
+
+                let responseData = await response.json();
+                if (!response.ok) throw new Error(responseData.error);
+
+                setLoadedUsers(responseData);
+                console.log(responseData);
+                setIsLoading(false);
+            } catch (error) {
+                setIsLoading(false);
+                setError(error.message);
+            }
+        };
+        fetchUser();
+    }, []);
+
+    return (
+        <React.Fragment>
+            {isLoading && <LoadingSpinner asOverlay />}
+            <ErrorModal
+                show={error}
+                onClear={() => setError(null)}
+                error={error}
+            />
+            <UsersList items={loadedUsers} />;
+        </React.Fragment>
+    );
 };
 
 export default Users;
