@@ -5,23 +5,18 @@ const useHttpClient = (): [
     string | null,
     (
         url: string,
-        method: any,
-        body: BodyInit,
-        headers: HeadersInit
-    ) => Promise<any>,
-    () => void
+        method?: string | undefined,
+        body?: BodyInit | undefined,
+        headers?: any
+    ) => any,
+    () => any
 ] => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<null | string>(null);
     const activeHttpRequest = useRef<AbortController[]>([]);
 
     const sendRequest = useCallback(
-        async (
-            url: string,
-            method = "GET",
-            body: BodyInit,
-            headers: HeadersInit
-        ) => {
+        async (url: string, method = "GET", body, headers) => {
             setIsLoading(true);
             const httpAbortController = new AbortController();
             activeHttpRequest.current.push(httpAbortController);
@@ -37,7 +32,6 @@ const useHttpClient = (): [
                 activeHttpRequest.current = activeHttpRequest.current.filter(
                     (controller) => controller !== httpAbortController
                 );
-                console.log(activeHttpRequest.current);
                 if (!response.ok) {
                     throw new Error(responseData.message);
                 }
