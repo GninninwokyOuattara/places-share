@@ -46,9 +46,9 @@ export class Location {
         } else {
             this.address = response.data.features[0].place_name;
             this.location.lat =
-                response.data.features[0].geometry.coordinates[0];
-            this.location.long =
                 response.data.features[0].geometry.coordinates[1];
+            this.location.long =
+                response.data.features[0].geometry.coordinates[0];
         }
     }
 }
