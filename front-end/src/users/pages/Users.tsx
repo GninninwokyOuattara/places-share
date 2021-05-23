@@ -4,39 +4,42 @@ import UsersList from "../components/UsersList";
 import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
 import ErrorModal from "../../shared/components/UIElements/ErrorModal";
 
+import useHttpClient from "../../shared/hooks/http-hook";
+
 const Users: React.FC = () => {
     const [loadedUsers, setLoadedUsers] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<null | string>(null);
+    // const [isLoading, setIsLoading] = useState(false);
+    // const [error, setError] = useState<null | string>(null);
+    const [isLoading, error, sendRequest, clearError] = useHttpClient() as [
+        boolean,
+        string | null,
+        (
+            url: string,
+            method?: string | undefined,
+            body?: BodyInit | undefined,
+            headers?: any
+        ) => any,
+        () => any
+    ];
 
     useEffect(() => {
-        setIsLoading(true);
         const fetchUser = async () => {
             try {
-                let response = await fetch("http://localhost:5000/api/users");
-
-                let responseData = await response.json();
-                if (!response.ok) throw new Error(responseData.error);
+                let responseData = await sendRequest(
+                    "http://localhost:5000/api/users",
+                    "GET"
+                );
 
                 setLoadedUsers(responseData);
-                console.log(responseData);
-                setIsLoading(false);
-            } catch (error) {
-                setIsLoading(false);
-                setError(error.message);
-            }
+            } catch (error) {}
         };
         fetchUser();
-    }, []);
+    }, [sendRequest]);
 
     return (
         <React.Fragment>
             {isLoading && <LoadingSpinner asOverlay />}
-            <ErrorModal
-                show={error}
-                onClear={() => setError(null)}
-                error={error}
-            />
+            <ErrorModal show={error} onClear={clearError} error={error} />
             <UsersList items={loadedUsers} />;
         </React.Fragment>
     );
