@@ -1,39 +1,41 @@
-import React from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import PlaceList from "../components/PlaceList";
 
-const DUMMY_PLACES = [
-    {
-        id: "p1",
-        title: "empire state building",
-        description: "one of the most famous place in the world",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Empire_State_Building_from_the_Top_of_the_Rock.jpg/260px-Empire_State_Building_from_the_Top_of_the_Rock.jpg",
-        address: "20 W 34 St, New York, NY 10001",
-        location: {
-            lat: 40.74,
-            long: -73.98,
-        },
-        creator: "u1",
-    },
-    {
-        id: "p2",
-        title: "empire state builde",
-        description: "one of the most famous place in the world",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Empire_State_Building_from_the_Top_of_the_Rock.jpg/260px-Empire_State_Building_from_the_Top_of_the_Rock.jpg",
-        address: "20 W 34 St, New York, NY 10001",
-        location: {
-            lat: 40.74,
-            long: -73.98,
-        },
-        creator: "u2",
-    },
-];
+import useHttpClient from "../../shared/hooks/http-hook";
 
 const UserPlaces: React.FC = () => {
+    const [isLoading, error, sendRequest, clearError] = useHttpClient();
     const { uid } = useParams<{ uid: string }>();
-    const loadedPlaces = DUMMY_PLACES.filter((place) => place.creator === uid);
-    return <PlaceList items={loadedPlaces} />;
+    const [UserPlaces, setUserPlaces] = useState<
+        {
+            id: string;
+            image: string;
+            title: string;
+            description: string;
+            address: string;
+            creator: string;
+            location: { lat: number; long: number };
+        }[]
+    >([]);
+
+    useEffect(() => {
+        const fetchUserPlaces = async () => {
+            try {
+                const { places } = await sendRequest(
+                    `http://localhost:5000/api/places/user/${uid}`
+                );
+                setUserPlaces(places);
+                console.log(places);
+            } catch (error) {}
+        };
+
+        fetchUserPlaces();
+    }, [setUserPlaces]);
+
+    // const loadedPlaces = DUMMY_PLACES.filter((place) => place.creator === uid);
+    return <PlaceList items={UserPlaces} />;
 };
 
 export default UserPlaces;
