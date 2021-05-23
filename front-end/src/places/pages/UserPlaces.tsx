@@ -10,7 +10,7 @@ const UserPlaces: React.FC = () => {
     const { uid } = useParams<{ uid: string }>();
     const [UserPlaces, setUserPlaces] = useState<
         {
-            id: string;
+            _id: string;
             image: string;
             title: string;
             description: string;
@@ -20,6 +20,12 @@ const UserPlaces: React.FC = () => {
         }[]
     >([]);
 
+    const updateUserPlaces = useCallback((placeId: string) => {
+        setUserPlaces((places) =>
+            places.filter((place) => place._id !== placeId)
+        );
+    }, []);
+
     useEffect(() => {
         const fetchUserPlaces = async () => {
             try {
@@ -27,15 +33,13 @@ const UserPlaces: React.FC = () => {
                     `http://localhost:5000/api/places/user/${uid}`
                 );
                 setUserPlaces(places);
-                console.log(places);
             } catch (error) {}
         };
 
         fetchUserPlaces();
-    }, [setUserPlaces]);
+    }, [setUserPlaces, sendRequest, uid]);
 
-    // const loadedPlaces = DUMMY_PLACES.filter((place) => place.creator === uid);
-    return <PlaceList items={UserPlaces} />;
+    return <PlaceList items={UserPlaces} updateUserPlaces={updateUserPlaces} />;
 };
 
 export default UserPlaces;
