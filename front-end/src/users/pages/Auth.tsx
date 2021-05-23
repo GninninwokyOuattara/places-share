@@ -17,7 +17,9 @@ import useHttpClient from "../../shared/hooks/http-hook";
 import { AuthContext } from "../../shared/context/auth-context";
 
 const Auth = () => {
-    const { login } = useContext(AuthContext) as { login: () => void };
+    const { login } = useContext(AuthContext) as {
+        login: (userId: string) => void;
+    };
 
     const [isLoginMode, setIsLoginMode] = useState(true);
     // const [isLoading, setIsLoading] = useState(false);
@@ -65,7 +67,7 @@ const Auth = () => {
         event.preventDefault();
         if (isLoginMode) {
             try {
-                await sendRequest(
+                const { user } = await sendRequest(
                     "http://localhost:5000/api/users/login",
                     "POST",
                     JSON.stringify({
@@ -74,11 +76,12 @@ const Auth = () => {
                     }),
                     { "Content-Type": "application/json" }
                 );
-                login();
+
+                login(user._id);
             } catch (error) {}
         } else {
             try {
-                await sendRequest(
+                const { user } = await sendRequest(
                     "http://localhost:5000/api/users/signup",
                     "POST",
                     JSON.stringify({
@@ -88,7 +91,7 @@ const Auth = () => {
                     }),
                     { "Content-Type": "application/json" }
                 );
-                login();
+                login(user._id);
             } catch (error) {}
         }
     };
