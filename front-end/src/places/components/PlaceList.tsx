@@ -7,8 +7,9 @@ import Button from "../../shared/components/FormElements/Button";
 import "./PlaceList.css";
 
 interface props {
+    updateUserPlaces: (placeId: string) => void;
     items: {
-        id: string;
+        _id: string;
         image: string;
         title: string;
         description: string;
@@ -18,7 +19,7 @@ interface props {
     }[];
 }
 
-const PlaceList: React.FC<props> = ({ items }) => {
+const PlaceList: React.FC<props> = ({ items, updateUserPlaces }) => {
     if (items.length === 0) {
         return (
             <div className="place-list center">
@@ -33,14 +34,15 @@ const PlaceList: React.FC<props> = ({ items }) => {
         <ul className="place-list">
             {items.map((place) => (
                 <PlaceItem
-                    key={place.id}
-                    id={place.id}
+                    key={place._id}
+                    id={place._id}
                     image={place.image}
                     title={place.title}
                     description={place.description}
                     address={place.address}
                     creatorId={place.creator}
                     coordinates={place.location}
+                    updateUserPlaces={updateUserPlaces}
                 />
             ))}
         </ul>
