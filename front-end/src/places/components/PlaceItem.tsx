@@ -4,7 +4,11 @@ import Card from "../../shared/components/UIElements/Card";
 import Button from "../../shared/components/FormElements/Button";
 import Modal from "../../shared/components/UIElements/Modal";
 import Map from "../../shared/components/UIElements/Map";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
+
 import { AuthContext } from "../../shared/context/auth-context";
+import useHttpClient from "../../shared/hooks/http-hook";
 
 import "./PlaceItem.css";
 
@@ -16,6 +20,7 @@ interface props {
     creatorId: string;
     coordinates: { lat: number; long: number };
     address: string;
+    updateUserPlaces: (placeId: string) => void;
 }
 
 const PlaceItem: React.FC<props> = ({
@@ -24,25 +29,36 @@ const PlaceItem: React.FC<props> = ({
     image,
     address,
     coordinates,
+    creatorId,
+    updateUserPlaces,
 }) => {
     const [showMap, setShowMap] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const auth = useContext(AuthContext) as { isLoggedIn: boolean };
+    const [isLoading, error, sendRequest, clearError] = useHttpClient();
 
     const openMapHandler = () => setShowMap(true);
     const closeMapHandler = () => setShowMap(false);
 
     const openDeleteModal = () => setShowDeleteModal(true);
     const closeDeleteModal = () => setShowDeleteModal(false);
-    const deleteModalConfirmHandler = () => {
+    const deleteModalConfirmHandler = async () => {
         setShowDeleteModal(false);
-        console.log("DELETING...");
+        try {
+            await sendRequest(
+                `http://localhost:5000/api/places/${id}`,
+                "DELETE"
+            );
+            updateUserPlaces(id);
+        } catch (error) {}
     };
 
     const center = { lat: coordinates.lat, lng: coordinates.long };
 
     return (
         <React.Fragment>
+            <ErrorModal error={error} onClear={clearError} />
+
             <Modal
                 show={showMap}
                 onCancel={closeMapHandler}
@@ -96,6 +112,7 @@ const PlaceItem: React.FC<props> = ({
                             </React.Fragment>
                         )}
                     </div>
+                    {isLoading && <LoadingSpinner asOverlay />}
                 </Card>
             </li>
         </React.Fragment>
