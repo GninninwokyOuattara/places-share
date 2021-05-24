@@ -34,7 +34,10 @@ const PlaceItem: React.FC<props> = ({
 }) => {
     const [showMap, setShowMap] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const auth = useContext(AuthContext) as { isLoggedIn: boolean };
+    const auth = useContext(AuthContext) as {
+        isLoggedIn: boolean;
+        userId: string;
+    };
     const [isLoading, error, sendRequest, clearError] = useHttpClient();
 
     const openMapHandler = () => setShowMap(true);
@@ -103,7 +106,7 @@ const PlaceItem: React.FC<props> = ({
                         <Button inverse onClick={openMapHandler}>
                             VIEW ON MAP
                         </Button>
-                        {auth.isLoggedIn && (
+                        {auth.isLoggedIn && auth.userId === creatorId && (
                             <React.Fragment>
                                 <Button to={`/places/${id}`}>EDIT</Button>
                                 <Button danger onClick={openDeleteModal}>
