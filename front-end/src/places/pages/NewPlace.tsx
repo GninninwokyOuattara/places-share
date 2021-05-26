@@ -3,6 +3,7 @@ import { useHistory } from "react-router-dom";
 
 import Input from "../../shared/components/FormElements/Input";
 import Button from "../../shared/components/FormElements/Button";
+import ImageUpload from "../../shared/components/FormElements/ImageUpload";
 import {
     VALIDATOR_MINLENGTH,
     VALIDATOR_REQUIRE,
@@ -28,6 +29,14 @@ const NewPlace: React.FC = () => {
                 value: "",
                 isValid: false,
             },
+            image: {
+                value: "",
+                isValid: false,
+            },
+            address: {
+                value: "",
+                isValid: false,
+            },
         },
         false
     );
@@ -39,18 +48,15 @@ const NewPlace: React.FC = () => {
     ) => {
         event.preventDefault();
         try {
+            const formData = new FormData();
+            formData.append("title", formState.inputs.title.value);
+            formData.append("image", formState.inputs.image.value);
+            formData.append("address", formState.inputs.address.value);
+            formData.append("description", formState.inputs.description.value);
             await sendRequest(
                 "http://localhost:5000/api/places/",
                 "POST",
-                JSON.stringify({
-                    title: formState.inputs.title.value,
-                    description: formState.inputs.description.value,
-                    address: formState.inputs.address.value,
-                    creator: userId,
-                }),
-                {
-                    "Content-Type": "application/json",
-                }
+                formData
             );
 
             history.push("/");
@@ -70,6 +76,7 @@ const NewPlace: React.FC = () => {
                     errorText="Please enter a valid title"
                     onInput={inputHandler}
                 />
+                <ImageUpload center onInput={inputHandler} id="image" />
                 <Input
                     id="description"
                     element="textarea"
@@ -83,7 +90,7 @@ const NewPlace: React.FC = () => {
                     id="address"
                     element="input"
                     type="text"
-                    label="Description"
+                    label="Address"
                     validators={[VALIDATOR_REQUIRE()]}
                     errorText="Please enter a valid address"
                     onInput={inputHandler}
