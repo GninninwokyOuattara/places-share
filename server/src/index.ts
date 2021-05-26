@@ -1,3 +1,4 @@
+import fs from "fs";
 import express from "express";
 import cors from "cors";
 import placesRoutes from "./routes/places-routes";
@@ -32,11 +33,14 @@ app.use(
         if (res.headersSent) {
             return next(error);
         }
-        console.log("ERROR", error);
         // Due to multer returning a error object with code property as string
-        if (error.code === "LIMIT_FILE_SIZE") {
+        if (req.file) {
+            console.log(req.body);
+            fs.unlinkSync(req.file.path);
+        }
+        if (typeof error.code === "string") {
             res.status(500);
-            return res.json({ message: "File size too large" });
+            return res.json({ message: error.code });
         }
         res.status(error.code || 500);
         res.json({ message: error.message });
