@@ -4,6 +4,7 @@ import { useHistory } from "react-router-dom";
 
 import Input from "../../shared/components/FormElements/Input";
 import Button from "../../shared/components/FormElements/Button";
+import ImageUpload from "../../shared/components/FormElements/ImageUpload";
 import Card from "../../shared/components/UIElements/Card";
 import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
 import errorModal from "../../shared/components/UIElements/ErrorModal";
@@ -35,6 +36,14 @@ const UpdatePlace = () => {
                 value: "",
                 isValid: false,
             },
+            image: {
+                value: "",
+                isValid: false,
+            },
+            address: {
+                value: "",
+                isValid: false,
+            },
         },
         false
     );
@@ -58,6 +67,10 @@ const UpdatePlace = () => {
                         value: place.address,
                         isValid: true,
                     },
+                    image: {
+                        value: `http://localhost:5000${place.image}`,
+                        isValid: true,
+                    },
                 },
                 true
             );
@@ -73,21 +86,22 @@ const UpdatePlace = () => {
         async (event) => {
             event.preventDefault();
             try {
+                const formData = new FormData();
+                formData.append("title", formState.inputs.title.value);
+                formData.append("image", formState.inputs.image.value);
+                formData.append("address", formState.inputs.address.value);
+                formData.append(
+                    "description",
+                    formState.inputs.description.value
+                );
+                formData.append("creator", userId);
                 await sendRequest(
                     `http://localhost:5000/api/places/${placeid}`,
                     "PATCH",
-                    JSON.stringify({
-                        title: formState.inputs.title.value,
-                        description: formState.inputs.description.value,
-                        address: formState.inputs.address.value,
-                    }),
-                    { "Content-Type": "application/json" }
+                    formData
                 );
-                console.log("error");
                 history.push(`/${userId}/places`);
-            } catch (err) {
-                console.log(error);
-            }
+            } catch (err) {}
         };
 
     if (isLoading) {
@@ -131,6 +145,13 @@ const UpdatePlace = () => {
                     value={formState.inputs.title.value}
                     valid={formState.inputs.title.isValid}
                 />
+                <ImageUpload
+                    center
+                    onInput={inputHandler}
+                    id="image"
+                    value={formState.inputs.image.value}
+                />
+
                 <Input
                     id="description"
                     element="textarea"
