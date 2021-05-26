@@ -5,7 +5,9 @@ import "./ImageUpload.css";
 
 const ImageUpload: React.FC<any> = (props) => {
     const [file, setFile] = useState<File>();
-    const [previewUrl, setPreviewUrl] = useState<string | ArrayBuffer | null>();
+    const [previewUrl, setPreviewUrl] = useState<string | ArrayBuffer | null>(
+        props.value || null
+    );
     const [isValid, setIsValid] = useState(false);
 
     const pickerRef = useRef<HTMLInputElement>(null);
