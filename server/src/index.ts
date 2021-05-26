@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 import express from "express";
 import cors from "cors";
 import placesRoutes from "./routes/places-routes";
@@ -16,6 +17,13 @@ app.use(cors());
 app.use("/api/places/", placesRoutes);
 app.use("/api/users/", usersRoutes);
 
+app.use(
+    "/upload/images",
+    express.static(path.join(__dirname, "upload", "images"))
+);
+// app.use("/upload/images", (req, res) => {
+//     return res.send(path.join(__dirname, "upload", "images"));
+// });
 // Middleware to handle unknow route
 // Which will then be catch by our default error handler below
 app.use((req, res, next) => {
