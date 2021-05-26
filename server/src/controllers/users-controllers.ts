@@ -27,7 +27,7 @@ export const signUp: Controllers = async (req, res, next) => {
     }
 
     try {
-        user = await User.create(req.body);
+        user = await User.create({ ...req.body, image: req.file.path });
         return res.json({ user });
     } catch (error) {
         return next(new HttpError(error.message, 422));
