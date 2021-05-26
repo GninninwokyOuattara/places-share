@@ -21,9 +21,7 @@ app.use(
     "/upload/images",
     express.static(path.join(__dirname, "upload", "images"))
 );
-// app.use("/upload/images", (req, res) => {
-//     return res.send(path.join(__dirname, "upload", "images"));
-// });
+
 // Middleware to handle unknow route
 // Which will then be catch by our default error handler below
 app.use((req, res, next) => {
@@ -43,8 +41,9 @@ app.use(
         }
         // Due to multer returning a error object with code property as string
         if (req.file) {
-            console.log(req.body);
-            fs.unlinkSync(req.file.path);
+            setTimeout(() => {
+                fs.unlinkSync(req.file.path);
+            }, 10000);
         }
         if (typeof error.code === "string") {
             res.status(500);
