@@ -4,7 +4,8 @@ import { validationResult } from "express-validator";
 import { Location } from "../models/location";
 import { v4 } from "uuid";
 import mongoose, { Mongoose } from "mongoose";
-
+import fs from "fs";
+import path from "path";
 import { Place } from "../database/schema/place";
 import { User } from "../database/schema/user";
 
@@ -124,7 +125,11 @@ export const updatePlaceById: Controllers = async (req, res, next) => {
     }
 
     const locationData = newLocation.getLocation();
-    let updatedPlace = { ...req.body, ...locationData };
+    let updatedPlace = {
+        ...req.body,
+        ...locationData,
+        image: `/upload/images/${req.file.filename}`,
+    };
 
     let place = await Place.findById(req.params.pid);
     if (!place) {
@@ -132,9 +137,12 @@ export const updatePlaceById: Controllers = async (req, res, next) => {
     }
 
     try {
+        // Deleting previous image
+        fs.unlinkSync(path.join(__dirname, `../../src${place.image}`));
         place.title = updatedPlace.title;
         place.description = updatedPlace.description;
         place.address = updatedPlace.address;
+        place.image = updatedPlace.image;
         await place.save();
     } catch (error) {
         return next(
@@ -156,6 +164,7 @@ export const deletePlaceById: Controllers = async (req, res, next) => {
             return next(new HttpError("Place not found", 404));
         }
         place.remove({ session: sess });
+        fs.unlinkSync(path.join(__dirname, `../../src${place.image}`));
         user = await User.findById(place.creator);
         user.places.pull(req.params.pid);
         user.save();
