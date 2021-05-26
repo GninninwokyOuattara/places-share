@@ -24,6 +24,10 @@ const PlaceSchema = new Schema({
             required: true,
         },
     },
+    image: {
+        type: String,
+        required: true,
+    },
     creator: {
         type: Schema.Types.ObjectId,
         ref: "User",
