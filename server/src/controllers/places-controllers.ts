@@ -73,7 +73,11 @@ export const postPlace: Controllers = async (req, res, next) => {
     const locationData = newLocation.getLocation();
     let place;
     let user;
-    place = new Place({ ...req.body, ...locationData });
+    place = new Place({
+        ...req.body,
+        ...locationData,
+        image: `/upload/images/${req.file.filename}`,
+    });
 
     try {
         user = await User.findById(req.body.creator);
