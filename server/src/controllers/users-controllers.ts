@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import bcrypt from "bcrypt";
 import { validationResult } from "express-validator";
 import HttpError from "../models/http-error";
 
@@ -26,9 +27,20 @@ export const signUp: Controllers = async (req, res, next) => {
         );
     }
 
+    // Hash password
+    let hashedPassword;
+    try {
+        hashedPassword = await bcrypt.hash(req.body.password, 12);
+    } catch (error) {
+        return next(
+            new HttpError("Could not create account, please try again.", 500)
+        );
+    }
+
     try {
         user = await User.create({
             ...req.body,
+            password: hashedPassword,
             image: `/upload/images/${req.file.filename}`,
         });
         return res.json({ user });
@@ -47,9 +59,13 @@ export const logIn: Controllers = async (req, res, next) => {
 
     const { email, password } = req.body;
 
-    let user = await User.findOne({ email: email, password: password });
+    let user = await User.findOne({ email: email });
     if (!user) {
         return next(new HttpError("No account found", 400));
+    }
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+        return next(new HttpError("Invalid Credentials", 402));
     }
     return res.json({ message: "Success", user });
 };
