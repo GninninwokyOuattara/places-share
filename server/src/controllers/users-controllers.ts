@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
+import { default as jwt } from "jsonwebtoken";
 import { validationResult } from "express-validator";
 import HttpError from "../models/http-error";
 
@@ -43,7 +44,21 @@ export const signUp: Controllers = async (req, res, next) => {
             password: hashedPassword,
             image: `/upload/images/${req.file.filename}`,
         });
-        return res.json({ user });
+
+        let token = jwt.sign(
+            { user: user._id, email: user.email },
+            "supersecret",
+            {
+                expiresIn: "1h",
+            }
+        );
+        return res.json({
+            user: {
+                _id: user._id,
+                email: user.email,
+                token,
+            },
+        });
     } catch (error) {
         return next(new HttpError(error.message, 422));
     }
@@ -67,5 +82,15 @@ export const logIn: Controllers = async (req, res, next) => {
     if (!isValidPassword) {
         return next(new HttpError("Invalid Credentials", 402));
     }
-    return res.json({ message: "Success", user });
+    let token = jwt.sign({ user: user._id, email: user.email }, "supersecret", {
+        expiresIn: "1h",
+    });
+    return res.json({
+        message: "Success",
+        user: {
+            _id: user._id,
+            email: user.email,
+            token,
+        },
+    });
 };

@@ -9,7 +9,14 @@ import path from "path";
 import { Place } from "../database/schema/place";
 import { User } from "../database/schema/user";
 
-type Controllers = (req: Request, res: Response, next: NextFunction) => void;
+type RequestExtended = Request & {
+    userData?: { _id: string; email: string };
+};
+type Controllers = (
+    req: RequestExtended,
+    res: Response,
+    next: NextFunction
+) => void;
 
 interface PostBody {
     id: string;
@@ -91,6 +98,14 @@ export const postPlace: Controllers = async (req, res, next) => {
         return next(new HttpError("Could not find user for provided Id", 404));
     }
 
+    if (
+        !req.userData ||
+        req.userData.email !== user.email ||
+        req.userData._id !== user._id.toString()
+    ) {
+        return next(new HttpError("Access Denied", 403));
+    }
+
     try {
         const sess = await mongoose.startSession();
         sess.startTransaction();
@@ -136,6 +151,21 @@ export const updatePlaceById: Controllers = async (req, res, next) => {
         return next(new HttpError("Could not find place", 404));
     }
 
+    // Find place creator
+    let user = await User.findById(place.creator);
+    if (!user) {
+        throw new HttpError("Place creator no found", 404);
+    }
+
+    //verify he is correctly authentificated
+    if (
+        !req.userData ||
+        req.userData.email !== user.email ||
+        req.userData._id !== user._id.toString()
+    ) {
+        return next(new HttpError("Access Denied", 403));
+    }
+
     try {
         // Deleting previous image
         fs.unlinkSync(path.join(__dirname, `../../src${place.image}`));
@@ -166,6 +196,20 @@ export const deletePlaceById: Controllers = async (req, res, next) => {
         place.remove({ session: sess });
         fs.unlinkSync(path.join(__dirname, `../../src${place.image}`));
         user = await User.findById(place.creator);
+
+        if (!user) {
+            throw new HttpError("Place creator no found", 404);
+        }
+
+        //verify he is correctly authentificated
+        if (
+            !req.userData ||
+            req.userData.email !== user.email ||
+            req.userData._id !== user._id.toString()
+        ) {
+            return next(new HttpError("Access Denied", 403));
+        }
+
         user.places.pull(req.params.pid);
         user.save();
         sess.commitTransaction();
