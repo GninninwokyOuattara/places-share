@@ -9,6 +9,7 @@ import {
 } from "../controllers/places-controllers";
 import { check } from "express-validator";
 import fileUpload from "../controllers/middleware/file-upload";
+import authCheck from "../controllers/middleware/auth-check";
 
 const router = express.Router();
 
@@ -17,6 +18,8 @@ router.get("/", getAllPlaces);
 router.get("/:pid", getPlaceByPlaceId);
 
 router.get("/user/:uid", getPlacesByUserId);
+
+router.use(authCheck);
 
 router.post(
     "/",
