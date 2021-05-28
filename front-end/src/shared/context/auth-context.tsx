@@ -3,7 +3,8 @@ import React, { createContext, useState, useCallback } from "react";
 interface ContextValue {
     isLoggedIn: boolean;
     userId: string | null;
-    login: (userId: string) => void;
+    userToken: string | null;
+    login: (userId: string, userToken: string) => void;
     logout: () => void;
 }
 
@@ -14,18 +15,23 @@ const AuthProvider: React.FC<{ children: React.ReactElement }> = ({
 }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
+    const [userToken, setUserToken] = useState<string | null>(null);
 
-    const login = useCallback((userId) => {
+    const login = useCallback((userId, userToken) => {
         setIsLoggedIn(true);
         setUserId(userId);
+        setUserToken(userToken);
     }, []);
     const logout = useCallback(() => {
         setIsLoggedIn(false);
         setUserId(null);
+        setUserToken(null);
     }, []);
 
     return (
-        <AuthContext.Provider value={{ isLoggedIn, userId, login, logout }}>
+        <AuthContext.Provider
+            value={{ isLoggedIn, userId, userToken, login, logout }}
+        >
             {children}
         </AuthContext.Provider>
     );
