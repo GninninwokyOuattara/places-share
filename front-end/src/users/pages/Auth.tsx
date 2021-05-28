@@ -18,8 +18,9 @@ import useHttpClient from "../../shared/hooks/http-hook";
 import { AuthContext } from "../../shared/context/auth-context";
 
 const Auth = () => {
-    const { login } = useContext(AuthContext) as {
-        login: (userId: string) => void;
+    const { login, userToken } = useContext(AuthContext) as {
+        login: (userId: string, userToken: string) => void;
+        userToken: string | null;
     };
 
     const [isLoginMode, setIsLoginMode] = useState(true);
@@ -82,7 +83,7 @@ const Auth = () => {
                     { "Content-Type": "application/json" }
                 );
 
-                login(user._id);
+                login(user._id, user.token);
             } catch (error) {}
         } else {
             try {
@@ -97,7 +98,7 @@ const Auth = () => {
                     "POST",
                     formData
                 );
-                login(user._id);
+                login(user._id, user.token);
             } catch (error) {}
         }
     };
