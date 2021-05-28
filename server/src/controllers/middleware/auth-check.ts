@@ -9,14 +9,13 @@ type RequestExtended = Request & {
 
 const authCheck = (req: RequestExtended, res: Response, next: NextFunction) => {
     try {
-        const token = req.headers.authorization?.replace("BEARER ", "");
+        const token = req.headers.authorization?.replace("Bearer ", "");
         if (token) {
             const decodedData = jwt.verify(token, "supersecret");
             req.userData = {
                 _id: (decodedData as { user: string }).user,
                 email: (decodedData as { email: string }).email,
             };
-            console.log(req.userData);
             next();
         } else {
             throw new Error();
