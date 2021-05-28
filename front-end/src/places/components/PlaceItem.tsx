@@ -37,6 +37,7 @@ const PlaceItem: React.FC<props> = ({
     const auth = useContext(AuthContext) as {
         isLoggedIn: boolean;
         userId: string;
+        userToken: string;
     };
     const [isLoading, error, sendRequest, clearError] = useHttpClient();
 
@@ -50,7 +51,11 @@ const PlaceItem: React.FC<props> = ({
         try {
             await sendRequest(
                 `http://localhost:5000/api/places/${id}`,
-                "DELETE"
+                "DELETE",
+                undefined,
+                {
+                    Authorization: `Bearer ${auth.userToken}`,
+                }
             );
             updateUserPlaces(id);
         } catch (error) {}

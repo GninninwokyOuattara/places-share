@@ -24,7 +24,10 @@ const UpdatePlace = () => {
     const { placeid } = useParams<{ placeid: string }>();
     const [placeFound, setPlaceFound] = useState(false);
     const history = useHistory();
-    const { userId } = useContext(AuthContext) as { userId: string };
+    const { userId, userToken } = useContext(AuthContext) as {
+        userId: string;
+        userToken: string;
+    };
 
     const [formState, inputHandler, setFormData] = useForm(
         {
@@ -98,7 +101,10 @@ const UpdatePlace = () => {
                 await sendRequest(
                     `http://localhost:5000/api/places/${placeid}`,
                     "PATCH",
-                    formData
+                    formData,
+                    {
+                        Authorization: `Bearer ${userToken}`,
+                    }
                 );
                 history.push(`/${userId}/places`);
             } catch (err) {}

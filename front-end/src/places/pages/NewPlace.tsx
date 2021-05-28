@@ -17,7 +17,10 @@ import useHttpClient from "../../shared/hooks/http-hook";
 import { AuthContext } from "../../shared/context/auth-context";
 
 const NewPlace: React.FC = () => {
-    const { userId } = useContext(AuthContext) as { userId: string };
+    const { userId, userToken } = useContext(AuthContext) as {
+        userId: string;
+        userToken: string;
+    };
     const [isLoading, error, sendRequest, clearError] = useHttpClient();
     const [formState, inputHandler] = useForm(
         {
@@ -57,7 +60,10 @@ const NewPlace: React.FC = () => {
             await sendRequest(
                 "http://localhost:5000/api/places/",
                 "POST",
-                formData
+                formData,
+                {
+                    Authorization: `Bearer ${userToken}`,
+                }
             );
 
             history.push("/");
