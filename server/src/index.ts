@@ -41,13 +41,13 @@ app.use(
         }
         // Due to multer returning a error object with code property as string
         if (req.file) {
-            setTimeout(() => {
-                fs.unlinkSync(req.file.path);
-            }, 10000);
+            fs.unlinkSync(req.file.path);
         }
         if (typeof error.code === "string") {
             res.status(500);
-            return res.json({ message: error.code });
+            return res.json({
+                message: "Invalid image provided, please change it.",
+            });
         }
         res.status(error.code || 500);
         res.json({ message: error.message });
