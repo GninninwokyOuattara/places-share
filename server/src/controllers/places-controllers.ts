@@ -133,6 +133,11 @@ export const updatePlaceById: Controllers = async (req, res, next) => {
         );
     }
 
+    let place = await Place.findById(req.params.pid);
+    if (!place) {
+        return next(new HttpError("Could not find place", 404));
+    }
+
     let newLocation = new Location(req.body.address);
     await newLocation.getGeometry();
     if (newLocation.error) {
@@ -143,13 +148,10 @@ export const updatePlaceById: Controllers = async (req, res, next) => {
     let updatedPlace = {
         ...req.body,
         ...locationData,
-        image: `/upload/images/${req.file.filename}`,
+        image: `${
+            req.file ? "/upload/images/" + req.file.filename : place.image
+        }`,
     };
-
-    let place = await Place.findById(req.params.pid);
-    if (!place) {
-        return next(new HttpError("Could not find place", 404));
-    }
 
     // Find place creator
     let user = await User.findById(place.creator);
@@ -168,7 +170,9 @@ export const updatePlaceById: Controllers = async (req, res, next) => {
 
     try {
         // Deleting previous image
-        fs.unlinkSync(path.join(__dirname, `../../src${place.image}`));
+        if (req.file) {
+            fs.unlinkSync(path.join(__dirname, `../../src${place.image}`));
+        }
         place.title = updatedPlace.title;
         place.description = updatedPlace.description;
         place.address = updatedPlace.address;
