@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import {
@@ -16,7 +16,60 @@ import Auth from "./users/pages/Auth";
 import { AuthContext } from "./shared/context/auth-context";
 
 function App() {
-    const auth = useContext(AuthContext) as { isLoggedIn: boolean };
+    const [expirationDate, setExpirationDate] = useState<null | number>(null);
+    const auth = useContext(AuthContext) as {
+        isLoggedIn: boolean;
+        logout: () => void;
+        login: (
+            userId: string,
+            userToken: string,
+            expirationDate?: string
+        ) => void;
+    };
+
+    let timerId: ReturnType<typeof setTimeout>;
+
+    useEffect(() => {
+        const userData: {
+            userId: string;
+            userToken: string;
+            expirationDate: string;
+        } = JSON.parse(localStorage.getItem("userData") as string);
+        console.log(userData);
+        if (userData) {
+            setExpirationDate(new Date(userData.expirationDate).getTime());
+        }
+        if (
+            userData &&
+            userData.userToken &&
+            userData.userId &&
+            userData.expirationDate &&
+            new Date(userData.expirationDate) > new Date()
+        ) {
+            auth.login(
+                userData.userId,
+                userData.userToken,
+                userData.expirationDate
+            );
+        } else {
+            auth.logout();
+        }
+
+        console.log(userData);
+    }, [auth.login, auth.logout]);
+
+    useEffect(() => {
+        if (auth.isLoggedIn && expirationDate) {
+            timerId = setTimeout(() => {
+                auth.logout();
+            }, expirationDate - new Date().getTime());
+        }
+
+        return () => {
+            clearTimeout(timerId);
+        };
+    }, [auth.isLoggedIn, expirationDate]);
+
     return (
         <Router>
             <MainNavigation />
