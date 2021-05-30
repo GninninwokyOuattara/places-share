@@ -14,61 +14,10 @@ import UserPlaces from "./places/pages/UserPlaces";
 import UpdatePlace from "./places/pages/UpdatePlace";
 import Auth from "./users/pages/Auth";
 import { AuthContext } from "./shared/context/auth-context";
+import useAuth from "./shared/hooks/auth-hook";
 
 function App() {
-    const [expirationDate, setExpirationDate] = useState<null | number>(null);
-    const auth = useContext(AuthContext) as {
-        isLoggedIn: boolean;
-        logout: () => void;
-        login: (
-            userId: string,
-            userToken: string,
-            expirationDate?: string
-        ) => void;
-    };
-
-    let timerId: ReturnType<typeof setTimeout>;
-
-    useEffect(() => {
-        const userData: {
-            userId: string;
-            userToken: string;
-            expirationDate: string;
-        } = JSON.parse(localStorage.getItem("userData") as string);
-        console.log(userData);
-        if (userData) {
-            setExpirationDate(new Date(userData.expirationDate).getTime());
-        }
-        if (
-            userData &&
-            userData.userToken &&
-            userData.userId &&
-            userData.expirationDate &&
-            new Date(userData.expirationDate) > new Date()
-        ) {
-            auth.login(
-                userData.userId,
-                userData.userToken,
-                userData.expirationDate
-            );
-        } else {
-            auth.logout();
-        }
-
-        console.log(userData);
-    }, [auth.login, auth.logout]);
-
-    useEffect(() => {
-        if (auth.isLoggedIn && expirationDate) {
-            timerId = setTimeout(() => {
-                auth.logout();
-            }, expirationDate - new Date().getTime());
-        }
-
-        return () => {
-            clearTimeout(timerId);
-        };
-    }, [auth.isLoggedIn, expirationDate]);
+    const { auth, expirationDate, uuid } = useAuth();
 
     return (
         <Router>
