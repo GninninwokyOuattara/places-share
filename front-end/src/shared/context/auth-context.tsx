@@ -17,14 +17,26 @@ const AuthProvider: React.FC<{ children: React.ReactElement }> = ({
     const [userId, setUserId] = useState<string | null>(null);
     const [userToken, setUserToken] = useState<string | null>(null);
 
-    const login = useCallback((userId, userToken) => {
+    const login = useCallback((userId, userToken, expiration?: Date) => {
         setIsLoggedIn(true);
+        const expirationDate = expiration
+            ? new Date(expiration)
+            : new Date(new Date().getTime() + 1000 * 60 * 60);
+        localStorage.setItem(
+            "userData",
+            JSON.stringify({
+                userId,
+                userToken,
+                expirationDate: expirationDate.toISOString(),
+            })
+        );
         setUserId(userId);
         setUserToken(userToken);
     }, []);
     const logout = useCallback(() => {
         setIsLoggedIn(false);
         setUserId(null);
+        localStorage.removeItem("userData");
         setUserToken(null);
     }, []);
 
