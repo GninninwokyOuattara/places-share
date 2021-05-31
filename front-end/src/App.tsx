@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, lazy, Suspense } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import {
@@ -7,52 +7,73 @@ import {
     Redirect,
     Switch,
 } from "react-router-dom";
-import Users from "./users/pages/Users";
-import NewPlace from "./places/pages/NewPlace";
-import MainNavigation from "./shared/components/Navigation/MainNavigation";
-import UserPlaces from "./places/pages/UserPlaces";
-import UpdatePlace from "./places/pages/UpdatePlace";
-import Auth from "./users/pages/Auth";
+
 import { AuthContext } from "./shared/context/auth-context";
 import useAuth from "./shared/hooks/auth-hook";
+import LoadingSpinner from "./shared/components/UIElements/LoadingSpinner";
+
+const Users = lazy(() => import("./users/pages/Users"));
+const NewPlace = lazy(() => import("./places/pages/NewPlace"));
+const MainNavigation = lazy(
+    () => import("./shared/components/Navigation/MainNavigation")
+);
+const UserPlaces = lazy(() => import("./places/pages/UserPlaces"));
+const UpdatePlace = lazy(() => import("./places/pages/UpdatePlace"));
+const Auth = lazy(() => import("./users/pages/Auth"));
 
 function App() {
     const { auth, expirationDate, uuid } = useAuth();
+    // const [router, setRouter] = useState<() => Element>()
 
+    let router;
+    if (auth.isLoggedIn) {
+        router = (
+            <Switch>
+                <Route path="/" exact>
+                    <Users />
+                </Route>
+                <Route path="/:uid/places" exact>
+                    <UserPlaces />
+                </Route>
+                <Route path="/places/new" exact>
+                    <NewPlace />
+                </Route>
+                <Route path="/places/:placeid" exact>
+                    <UpdatePlace />
+                </Route>
+                <Redirect to="/" />
+            </Switch>
+        );
+    } else {
+        router = (
+            <Switch>
+                <Route path="/" exact>
+                    <Users />
+                </Route>
+                <Route path="/:uid/places" exact>
+                    <UserPlaces />
+                </Route>
+                <Route path="/auth" exact>
+                    <Auth />
+                </Route>
+                <Redirect to="/auth" />
+            </Switch>
+        );
+    }
+    console.log(router);
     return (
         <Router>
             <MainNavigation />
             <main>
-                {auth.isLoggedIn ? (
-                    <Switch>
-                        <Route path="/" exact>
-                            <Users />
-                        </Route>
-                        <Route path="/:uid/places" exact>
-                            <UserPlaces />
-                        </Route>
-                        <Route path="/places/new" exact>
-                            <NewPlace />
-                        </Route>
-                        <Route path="/places/:placeid" exact>
-                            <UpdatePlace />
-                        </Route>
-                        <Redirect to="/" />
-                    </Switch>
-                ) : (
-                    <Switch>
-                        <Route path="/" exact>
-                            <Users />
-                        </Route>
-                        <Route path="/:uid/places" exact>
-                            <UserPlaces />
-                        </Route>
-                        <Route path="/auth" exact>
-                            <Auth />
-                        </Route>
-                        <Redirect to="/auth" />
-                    </Switch>
-                )}
+                <Suspense
+                    fallback={
+                        <div className="center">
+                            <LoadingSpinner />
+                        </div>
+                    }
+                >
+                    {router}
+                </Suspense>
             </main>
         </Router>
     );
