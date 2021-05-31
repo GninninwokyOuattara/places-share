@@ -54,7 +54,7 @@ const UpdatePlace = () => {
     const fetchPlaceData = useCallback(async () => {
         try {
             const { place } = await sendRequest(
-                `http://localhost:5000/api/places/${placeid}`
+                `${process.env.REACT_APP_BACKEND}places/${placeid}`
             );
             setFormData(
                 {
@@ -71,7 +71,7 @@ const UpdatePlace = () => {
                         isValid: true,
                     },
                     image: {
-                        value: `http://localhost:5000${place.image}`,
+                        value: `${process.env.REACT_APP_ASSET}${place.image}`,
                         isValid: true,
                     },
                 },
@@ -99,7 +99,7 @@ const UpdatePlace = () => {
                 );
                 formData.append("creator", userId);
                 await sendRequest(
-                    `http://localhost:5000/api/places/${placeid}`,
+                    `${process.env.REACT_APP_BACKEND}places/${placeid}`,
                     "PATCH",
                     formData,
                     {

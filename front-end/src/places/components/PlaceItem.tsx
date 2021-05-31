@@ -50,7 +50,7 @@ const PlaceItem: React.FC<props> = ({
         setShowDeleteModal(false);
         try {
             await sendRequest(
-                `http://localhost:5000/api/places/${id}`,
+                `${process.env.REACT_APP_BACKEND}/places/${id}`,
                 "DELETE",
                 undefined,
                 {
@@ -102,7 +102,7 @@ const PlaceItem: React.FC<props> = ({
                 <Card>
                     <div className="place-item__image">
                         <img
-                            src={`http://localhost:5000${image}`}
+                            src={`${process.env.REACT_APP_ASSET}${image}`}
                             alt={title}
                         />
                     </div>

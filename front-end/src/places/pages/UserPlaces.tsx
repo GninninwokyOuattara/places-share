@@ -30,7 +30,7 @@ const UserPlaces: React.FC = () => {
         const fetchUserPlaces = async () => {
             try {
                 const { places } = await sendRequest(
-                    `http://localhost:5000/api/places/user/${uid}`
+                    `${process.env.REACT_APP_BACKEND}/places/user/${uid}`
                 );
                 setUserPlaces(places);
             } catch (error) {}
